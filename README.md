@@ -51,5 +51,7 @@ Read this article about restriced shells: http://pen-testing.sans.org/blog/2012/
 
 Don't change the "Dangerous Characters" array, if you for example remove the `&` then you can do something like this: `ssh user@host "ls && perl -e 'exec "/bin/bash"'"`. 
 
+## See Also
 
+Another way to restrict ssh, written by me: https://github.com/RaymiiOrg/restrict_ssh
 
