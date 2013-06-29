@@ -22,7 +22,7 @@
 
 # It currently only checks commands, no parameters. This is on purpose.
 
-import getpass, os, re, sys, syslog, signal, socket, readline, subprocess
+import getpass, os, re, sys, syslog, signal, socket, readline
 
 # format of whitelist: one command or regex per line
 command_whitelist = "/etc/bdsh_whitelist.conf"
@@ -55,11 +55,11 @@ def dangerous_characters_in_command(command):
 def execute_command(command):
     """First log, then execute a command"""
     log_command(command, "success")
-    try:
-        subprocess.call(command, shell=False)
-    except OSError:
-        pass
-    # os.system(command)
+    # try:
+    #     subprocess.call(command, shell=False)
+    # except OSError:
+    #     pass
+    os.system(command)
 
 def command_allowed(command, whitelist_file=command_whitelist):
     """Check if a command is allowed on the whitelist."""
