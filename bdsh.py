@@ -52,6 +52,12 @@ def dangerous_characters_in_command(command):
             if command_char == dangerous_char:
                 return True
 
+def entire_command_scanner(command):
+    danger = ["&&"]
+    for dangerous_char in danger:
+        if re.findall(dangerous_char, command):
+            return True
+
 def execute_command(command):
     """First log, then execute a command"""
     log_command(command, "success")
@@ -66,7 +72,7 @@ def command_allowed(command, whitelist_file=command_whitelist):
     try:
         with open(whitelist_file, mode="r") as whitelist:
             for line in whitelist:
-                # No idea why the \n is needed but it is...
+                # We are reading commands from a file, therefore we also read the \n.
                 if command + "\n" == line:
                     return True
                 else:
@@ -92,13 +98,14 @@ def interactive_shell():
         if command == "exit" or command == "quit":
             sys.exit()
         elif command:
-            if command_allowed(command.split(" ", 1)[0]):
-                for chars in command:
-                    if dangerous_characters_in_command(chars):
-                        log_command(command, "danger")
-                        # Don't let the user know via an interactive shell and don't exit
-                        command=""
-                execute_command(command)
+            if not entire_command_scanner(command):
+                if command_allowed(command.split(" ", 1)[0]):
+                    for chars in command:
+                        if dangerous_characters_in_command(chars):
+                            log_command(command, "danger")
+                            # Don't let the user know via an interactive shell and don't exit
+                            command=""
+                    execute_command(command)
    
 if __name__ == "__main__":
     ## Catch CTRL+C / SIGINT.
@@ -116,7 +123,7 @@ if __name__ == "__main__":
         interactive_shell()
     else:
         ## Check if we are not launched via the local shell with a command (./shell.py ls)
-        if sys.argv[1] and sys.argv[1] != "-c" and command_allowed(sys.argv[1].split(" ", 1)[0]):
+        if sys.argv[1] and sys.argv[1] != "-c" and command_allowed(sys.argv[1].split(" ", 1)[0]) and not entire_command_scanner(sys.argv[1]):
             for arg in sys.argv[1:]:
                 arguments += arg
                 arguments += " "
@@ -127,7 +134,7 @@ if __name__ == "__main__":
                 arguments += arg
                 arguments += " "
             log_command(arguments, "failed")
-        elif sys.argv[2] and command_allowed(sys.argv[2].split(" ", 1)[0]):
+        elif sys.argv[2] and command_allowed(sys.argv[2].split(" ", 1)[0]) and not entire_command_scanner(sys.argv[2]):
             for arg in sys.argv[2:]:
                 arguments += arg
                 arguments += " "
